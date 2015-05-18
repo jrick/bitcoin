@@ -235,7 +235,50 @@ public:
 };
 static CRegTestParams regTestParams;
 
-static CChainParams *pCurrentParams = 0;
+/**
+ * Simulation test
+ */
+class CSimNetParams : public CTestNetParams {
+public:
+    CSimNetParams() {
+        strNetworkID = "sim";
+        consensus.powLimit = uint256S("7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+        pchMessageStart[0] = 0x16;
+        pchMessageStart[1] = 0x1c;
+        pchMessageStart[2] = 0x14;
+        pchMessageStart[3] = 0x12;
+        genesis.nTime = 1401292357;
+        genesis.nBits = 0x207fffff;
+        genesis.nNonce = 2;
+        consensus.hashGenesisBlock = genesis.GetHash();
+        nDefaultPort = 18555;
+        assert(consensus.hashGenesisBlock == uint256S("0x683e86bd5c6d110d91b94b97137ba6bfe02dbbdb8e3dff722a669b5d69d77af6"));
+        nPruneAfterHeight = 1000;
+
+        vFixedSeeds.clear(); //! SimNet mode doesn't have any fixed seeds.
+        vSeeds.clear();      //! SimNet mode doesn't have any DNS seeds.
+
+        base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,0x3F);
+        base58Prefixes[SCRIPT_ADDRESS] = std::vector<unsigned char>(1,0x7B);
+        base58Prefixes[SECRET_KEY] =     std::vector<unsigned char>(1,0x64);
+        base58Prefixes[EXT_PUBLIC_KEY] = boost::assign::list_of(0x04)(0x20)(0xBD)(0x3A).convert_to_container<std::vector<unsigned char> >();
+        base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x20)(0xB9)(0x00).convert_to_container<std::vector<unsigned char> >();
+
+        fDefaultConsistencyChecks = true;
+        fTestnetToBeDeprecatedFieldRPC = false;
+
+        checkpointData = (Checkpoints::CCheckpointData){
+            boost::assign::map_list_of
+            ( 0, uint256S("683e86bd5c6d110d91b94b97137ba6bfe02dbbdb8e3dff722a669b5d69d77af6")),
+            0,
+            0,
+            0
+        };
+    }
+};
+static CSimNetParams simNetParams;
+
+static CChainParams* pCurrentParams = 0;
 
 const CChainParams &Params() {
     assert(pCurrentParams);
@@ -250,6 +293,8 @@ CChainParams &Params(CBaseChainParams::Network network) {
             return testNetParams;
         case CBaseChainParams::REGTEST:
             return regTestParams;
+        case CBaseChainParams::SIMNET:
+            return simNetParams;
         default:
             assert(false && "Unimplemented network");
             return mainParams;
